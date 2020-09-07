@@ -22,3 +22,19 @@ ressources
 		ScalingAdjustment  //The amount by which to scale, based on the specified adjustment type
 		NotificationConfiguration //defines when we will receive an email 
 		LaunchConfigurationName // name of the launch configuration 
+
+
+c
+adding to ressources
+	NFSServer
+I have created NFS Server based on an EC2 instance, 
+the second option is to Create and EBS Volume in the EC2 instance and add this code
+"EBSVolume" : {
+   "Type" : "AWS::EC2::Volume",
+   "Properties" : {
+      "Size" : "100",
+      "VolumeType" : "io1",
+      "Iops" : "100",
+      "AvailabilityZone" : { "Fn::GetAtt" : [ "EC2Instance", "AvailabilityZone" ] }
+   }
+} 

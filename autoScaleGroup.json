@@ -6,9 +6,55 @@
       "Description": "Region specific image from the Parameter Store",
       "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
       "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+    },
+    "Subnets":{
+      "Type":"CommaDelimitedList"
     }
   },
   "Resources":{
+    "NFSServer":{
+         "Type":"AWS::EC2::Instance",
+         "Metadata":{
+            "AWS::CloudFormation::Init":{
+               "config":{
+                  "files":{
+                     "/tmp/nfs":{
+                        "content":"data"
+                     }
+                  },
+                  "commands":{
+                     "makedir":{
+                        "command":"mkdir /nfs"
+                     }
+                  },
+                  "services":{
+                     "sysvinit":{
+                        "nfs":{
+                           "enabled":"true",
+                           "ensureRunning":"true"
+                        }
+                     }
+                  },
+                  "packages":{
+                     "yum":{
+                        "nfs-utils":[
+                           
+                        ]
+                     }
+                  }
+               }
+            }
+         }
+      },
+     "WebServerSecurityGroup" : {
+       "Type" : "AWS::EC2::SecurityGroup",
+       "Properties" : {
+       "GroupDescription" : "Enable HTTP access via port 80 locked down to the load balancer + SSH access",
+       "SecurityGroupIngress" : [
+       {"IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"},
+       {"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"}
+       ]}
+      },
     "NotificationTopic": {
     "Type": "AWS::SNS::Topic",
     "Properties": {
@@ -28,15 +74,16 @@
       "Type":"AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
         "AutoScalingGroupName": "invincible_brands_asg",
-        "MinSize":"1",
-        "MaxSize":"5",
-        "DesiredCapacity":"3",
+        "MinSize":"10",
+        "MaxSize":"50",
+        "DesiredCapacity":"20",
         "Timeout" : "5",
         "HealthCheckType" : "ELB",
         "HealthCheckGracePeriod" : 300,
         "ScaleInCooldown" : 600,
         "ScaleOutCooldown" : 300,
         "DeleteOnTermination":"true",
+        "SecurityGroups" : [ {"Ref" : "WebServerSecurityGroup"} ],
         "AdjustmentType" : "ChangeInCapacity",
         "ScalingAdjustment" : "1",
           "CreationPolicy" : {
@@ -73,6 +120,4 @@
       }
     }
       }
-    }
-  }
   }
