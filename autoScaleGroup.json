@@ -1,0 +1,78 @@
+{
+  "AWSTemplateFormatVersion":"2020-09-06",
+  "Description":"CloudFormation exercice for invincible brands",
+  "Parameters":{
+    "AMI-ID": {
+      "Description": "Region specific image from the Parameter Store",
+      "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+      "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+    }
+  },
+  "Resources":{
+    "NotificationTopic": {
+    "Type": "AWS::SNS::Topic",
+    "Properties": {
+      "Subscription": [ { "Endpoint": { "Ref": "OperatorEMail" }, "Protocol": "email" } ]
+      }
+    },
+    "IBLaunchConfiguration":{
+      "Type":"AWS::AutoScaling::LaunchConfiguration",
+      "Properties":{
+        "ImageId":{
+          "Ref":"AMI-ID"
+        },
+        "InstanceType":"t2.large"
+      }
+    },
+    "invincible_brands_asg": {
+      "Type":"AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "AutoScalingGroupName": "invincible_brands_asg",
+        "MinSize":"1",
+        "MaxSize":"5",
+        "DesiredCapacity":"3",
+        "Timeout" : "3600",
+        "HealthCheckType" : "ELB",
+        "HealthCheckGracePeriod" : 300,
+        "ScaleInCooldown" : 600,
+        "ScaleOutCooldown" : 300,
+        "DeleteOnTermination":"true",
+        "AdjustmentType" : "ChangeInCapacity",
+        "ScalingAdjustment" : "1",
+          "CreationPolicy" : {
+           "ResourceSignal" : {
+           "Timeout" : "PT5M",
+           "Count" : "1"
+           }
+           },
+            "UpdatePolicy": {
+            "AutoScalingRollingUpdate": {
+            "MinInstancesInService": "1",
+            "MaxBatchSize": "1",
+            "PauseTime" : "PT5M",
+            "Timeout" : "PT5M",
+            "WaitOnResourceSignals": "true",
+            "SuspendProcesses" : [
+            "HealthCheck",
+            "ReplaceUnhealthy",
+            "AZRebalance",
+            "AlarmNotification",
+            "ScheduledActions"
+         ]
+             }},
+        "NotificationConfiguration" : {
+          "TopicARN" : { "Ref" : "NotificationTopic" },
+          "NotificationTypes" : [ "autoscaling:EC2_INSTANCE_LAUNCH",
+                                  "autoscaling:EC2_INSTANCE_LAUNCH_ERROR",
+                                  "autoscaling:EC2_INSTANCE_TERMINATE",
+                                  "autoscaling:EC2_INSTANCE_TERMINATE_ERROR"]
+        },
+        "LaunchConfigurationName":{
+          "Ref":"IBLaunchConfiguration"
+        }
+      }
+    }
+      }
+    }
+  }
+  }

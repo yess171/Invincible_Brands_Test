@@ -1,0 +1,24 @@
+tasks: 
+1
+a and b
+
+creation of the template with basic Cloud Formation parameters/ressources for autoScalingGroup:
+parameters
+	AMI-ID
+ressources
+	NotificationTopic
+	LaunchConfiguration
+	autoScalingGroup
+		MinSize
+		MaxSize
+		DesiredCapacity
+		Timeout
+		HealthCheckType
+		HealthCheckGracePeriod
+		ScaleInCooldown
+		ScaleOutCooldown
+		DeleteOnTermination
+		AdjustmentType
+		ScalingAdjustment
+		NotificationConfiguration
+		LaunchConfigurationName
