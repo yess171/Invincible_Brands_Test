@@ -13,14 +13,12 @@ ressources
 		MaxSize //max num of instances
 		DesiredCapacity //desired number of instances
 		Timeout //CF should allot before timing out stack creation operation
-		HealthCheckType //ELB/EC2 Thus ELB health checks are  smarter and 					verify that actual app works instead of verifying that 					just an instance works
-		HealthCheckGracePeriod //determine how long to wait before checking 						the health status of the instance
-		ScaleInCooldown //The amount of time, in seconds, after a scale-in 					activity completes before another scale-in activity
-						can start.
+		HealthCheckType //ELB/EC2 Thus ELB health checks are  smarter and verify that actual app works instead of verifying that just 					an instance works
+		HealthCheckGracePeriod //determine how long to wait before checking the health status of the instance
+		ScaleInCooldown //The amount of time, in seconds, after a scale-in activity completes before another scale-in activity can 					start.
 		ScaleOutCooldown //same like ScaleInCooldown
-		DeleteOnTermination //Indicates whether to delete the volume when the 						instance is terminated. For Amazon EC2 Auto
-							  Scaling, the default value is true.
+		DeleteOnTermination //Indicates whether to delete the volume when the instance is terminated. For Amazon EC2 Auto Scaling, 						the default value is true.
 		AdjustmentType  //Specifies how the scaling adjustment is interpreted
-		ScalingAdjustment  //The amount by which to scale, based on the 						specified adjustment type
+		ScalingAdjustment  //The amount by which to scale, based on the specified adjustment type
 		NotificationConfiguration //defines when we will receive an email 
 		LaunchConfigurationName // name of the launch configuration 
