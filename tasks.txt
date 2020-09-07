@@ -64,3 +64,36 @@ adding to ressources
 	myALBRequestCountPolicy
 adding to autoScalingGroup the propertie VPCZoneIdentifier TargetGroupARNs 
 
+3
+In Order to use a Redis Cluster via ElasticCache for the autoScalingGroup
+we can:
+solution 1:
+//do it via AWS console
+	- Create a Redis with Cluster Mode Enabled using AWS ElastiCache //taken from AWS Documentation
+
+aws elasticache create-replication-group \
+   --replication-group-id sample-repl-group \
+   --replication-group-description "Demo cluster with replicas" \
+   --num-node-groups 3 \
+   --replicas-per-node-group 2 \
+   --cache-node-type cache.m4.large \
+   --cache-parameter-group default.redis3.2.cluster.on \
+   --engine redis \
+   --engine-version 3.2.4
+   --security-group-ids SECURITY_GROUP_ID       
+   --cache-subnet-group-name SUBNET_GROUP_NAME>
+ 
+	-  launch an ElastiCache cluster in a specific Availability Zone and make sure to specify the Preferred Zone
+	-  select Spread Nodes Across Zones in order to distribute cache nodes across these zones as evenly as possible
+
+Solution 2:
+// via command line using powerShell commands:
+
+$VPC = Get-EC2Vpc -Filter @{name='isDefault'; value='true'}
+$Group = New-invincible_brands_asg -GroupName 'ElastiCacheRedis' -Description 'Allows TCP Port 6379'
+Grant-invincible_brands_asgIngress -GroupId $Group -IpPermission  @{ IpProtocol="tcp"; FromPort="6379"; ToPort="6379"; IpRanges=$VPC.CidrBlock }
+
+New-ECCacheCluster -CacheClusterId 'Invincible_Brand_Cluster' -Engine 'redis' -CacheNodeType 'cache.t2.micro' -NumCacheNode 1 -SecurityGroupId $Group
+
+(Get-ECCacheCluster -CacheClusterId 'Invincible_Brand_Cluster' -ShowCacheNodeInfo $true).CacheNodes[0].Endpoint.Address
+
