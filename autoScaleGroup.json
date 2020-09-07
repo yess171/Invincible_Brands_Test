@@ -1,5 +1,5 @@
 {
-  "AWSTemplateFormatVersion":"2020-09-06",
+  "AWSTemplateFormatVersion":"2020-10-06",
   "Description":"CloudFormation exercice for invincible brands",
   "Parameters":{
     "AMI-ID": {
@@ -122,7 +122,7 @@
         "MinSize":"1",
         "MaxSize":"5",
         "DesiredCapacity":"3",
-        "Timeout" : "3600",
+        "Timeout" : "5",
         "HealthCheckType" : "ELB",
         "HealthCheckGracePeriod" : 300,
         "ScaleInCooldown" : 600,
