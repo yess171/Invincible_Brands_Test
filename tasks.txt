@@ -4,21 +4,23 @@ a and b
 
 creation of the template with basic Cloud Formation parameters/ressources for autoScalingGroup:
 parameters
-	AMI-ID
+	AMI-ID //image is required to launch instances  
 ressources
-	NotificationTopic
-	LaunchConfiguration
-	autoScalingGroup
-		MinSize
-		MaxSize
-		DesiredCapacity
-		Timeout
-		HealthCheckType
-		HealthCheckGracePeriod
-		ScaleInCooldown
-		ScaleOutCooldown
-		DeleteOnTermination
-		AdjustmentType
-		ScalingAdjustment
-		NotificationConfiguration
-		LaunchConfigurationName
+	NotificationTopic //it automates sending email/text message based on events
+	LaunchConfiguration //basic config will be used when creating new instance
+	autoScalingGroup //auto scaling group of proprties
+		MinSize //num min of instances
+		MaxSize //max num of instances
+		DesiredCapacity //desired number of instances
+		Timeout //CF should allot before timing out stack creation operation
+		HealthCheckType //ELB/EC2 Thus ELB health checks are  smarter and 					verify that actual app works instead of verifying that 					just an instance works
+		HealthCheckGracePeriod //determine how long to wait before checking 						the health status of the instance
+		ScaleInCooldown //The amount of time, in seconds, after a scale-in 					activity completes before another scale-in activity
+						can start.
+		ScaleOutCooldown //same like ScaleInCooldown
+		DeleteOnTermination //Indicates whether to delete the volume when the 						instance is terminated. For Amazon EC2 Auto
+							  Scaling, the default value is true.
+		AdjustmentType  //Specifies how the scaling adjustment is interpreted
+		ScalingAdjustment  //The amount by which to scale, based on the 						specified adjustment type
+		NotificationConfiguration //defines when we will receive an email 
+		LaunchConfigurationName // name of the launch configuration 
