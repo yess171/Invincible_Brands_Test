@@ -28,7 +28,7 @@ c
 adding to ressources
 	NFSServer
 I have created NFS Server based on an EC2 instance, 
-the second option is to Create and EBS Volume in the EC2 instance and add this code
+the second option is to Create and EBS Volume in the EC2 instance then modify it to work as and NFS Storage. this code is to instanciate the EBS Volume
 "EBSVolume" : {
    "Type" : "AWS::EC2::Volume",
    "Properties" : {
@@ -38,3 +38,29 @@ the second option is to Create and EBS Volume in the EC2 instance and add this c
       "AvailabilityZone" : { "Fn::GetAtt" : [ "EC2Instance", "AvailabilityZone" ] }
    }
 } 
+
+d
+adding to parameters
+	Subnets
+
+e
+adding to ressources
+	WebServerSecurityGroup //adding a SG to allow only port 80 and 22
+adding to autoScalingGroup the propertie SecurityGroups 
+
+2
+//to handle a big number of users[1k-10K] Users we should add to our infrastructure Availability zonesand Policy to handle when we shoudl scale up / down
+adding to parameters
+	VPC 
+	AZs
+	ALBRequestCountTargetValue
+
+//to be able to use a load balancer between the 2 (or more AZs) we should instanciate a LB listener and target group (to recognize our subnets)
+//ALBRequestCountPolicy will check how much conection to our server has been reached in order to trigger the scalablity 
+adding to ressources
+	myLoadBalancer
+	myLoadBalancerListener
+	myTargetGroup
+	myALBRequestCountPolicy
+adding to autoScalingGroup the propertie VPCZoneIdentifier TargetGroupARNs 
+

@@ -9,10 +9,19 @@
     },
     "Subnets":{
       "Type":"CommaDelimitedList"
-    }
+    },
+    "VPC":{
+    "Type":"VPC_ID"
+    },
+     "AZs":{
+     "Type":"CommaDelimitedList"
+     },
+    "ALBRequestCountTargetValue":{
+    "Type":"5000"
+      }
   },
   "Resources":{
-    "NFSServer":{
+        "NFSServer":{
          "Type":"AWS::EC2::Instance",
          "Metadata":{
             "AWS::CloudFormation::Init":{
@@ -44,8 +53,42 @@
                   }
                }
             }
+         }},
+      "IBLoadBalancer":{
+      "Type":"AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties":{
+         "Subnets":{
+           "Ref":"Subnets"
          }
-      },
+      }},
+      "IBLoadBalancerListener":{
+         "Type":"AWS::ElasticLoadBalancingV2::Listener",
+         "Properties":{
+            "DefaultActions":[
+               {
+                  "TargetGroupArn":{
+                     "Ref":"IBTargetGroup"
+                  },
+                  "Type":"forward"
+               }
+            ],
+            "LoadBalancerArn":{
+               "Ref":"IBLoadBalancer"
+            },
+            "Port":80,
+            "Protocol":"HTTP"
+          }},   
+      "IBTargetGroup":{
+      "Type":"AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties":{
+        "Name":"IBTargetGroup",
+        "Port":80,
+        "Protocol":"HTTP",
+        "VpcId":{
+          "Ref":"VPC"
+        }
+      }
+    }, 
      "WebServerSecurityGroup" : {
        "Type" : "AWS::EC2::SecurityGroup",
        "Properties" : {
@@ -74,18 +117,20 @@
       "Type":"AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
         "AutoScalingGroupName": "invincible_brands_asg",
-        "MinSize":"10",
-        "MaxSize":"50",
-        "DesiredCapacity":"20",
-        "Timeout" : "5",
+        "AvailabilityZones" : { "Ref" : "AZs" },
+        "VPCZoneIdentifier" : { "Ref" : "Subnets" },
+        "MinSize":"1",
+        "MaxSize":"5",
+        "DesiredCapacity":"3",
+        "Timeout" : "3600",
         "HealthCheckType" : "ELB",
         "HealthCheckGracePeriod" : 300,
         "ScaleInCooldown" : 600,
         "ScaleOutCooldown" : 300,
         "DeleteOnTermination":"true",
-        "SecurityGroups" : [ {"Ref" : "WebServerSecurityGroup"} ],
         "AdjustmentType" : "ChangeInCapacity",
         "ScalingAdjustment" : "1",
+        "SecurityGroups" : [ {"Ref" : "WebServerSecurityGroup"} ],
           "CreationPolicy" : {
            "ResourceSignal" : {
            "Timeout" : "PT5M",
@@ -116,8 +161,49 @@
         },
         "LaunchConfigurationName":{
           "Ref":"IBLaunchConfiguration"
+        },
+        "TargetGroupARNs":[
+          {
+            "Ref":"IBTargetGroup"
+          }
+        ]
+      }
+    },
+      "IBALBRequestCountPolicy":{
+      "Type":"AWS::AutoScaling::ScalingPolicy",
+      "Properties":{
+        "AutoScalingGroupName":{
+          "Ref":"invincible_brands_asg"
+        },
+        "PolicyType":"TargetTrackingScaling",
+        "TargetTrackingConfiguration":{
+          "PredefinedMetricSpecification":{
+            "PredefinedMetricType":"ALBRequestCountPerTarget",
+            "ResourceLabel":{
+              "Fn::Join":[
+                "/",
+                [
+                  {
+                    "Fn::GetAtt":[
+                      "IBLoadBalancer",
+                      "LoadBalancerFullName"
+                    ]
+                  },
+                  {
+                    "Fn::GetAtt":[
+                      "IBTargetGroup",
+                      "TargetGroupFullName"
+                    ]
+                  }
+                ]
+              ]
+            }
+          },
+          "TargetValue":{
+            "Ref":"ALBRequestCountTargetValue"
+          }
         }
       }
     }
-      }
+  }
   }
